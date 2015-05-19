@@ -1,0 +1,146 @@
+package com.genetic.life.organism;
+
+import java.util.Iterator;
+
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
+import com.genetic.life.basic.Life;
+import com.genetic.life.basic.Render;
+import com.genetic.life.utils.MathUtil;
+import com.genetic.life.utils.Vec2;
+import com.genetic.life.world.Food;
+
+public class Drone {
+	
+	public static int ENERGY = 10;
+	
+	private Vec2 position;
+	private Vec2 velocity;
+	
+	private float max_health;
+	private float health;
+	private int radius;
+	private int speed;
+	
+	private boolean isAlive;
+	
+	public Drone(DNA dna) {
+		int DNA = dna.getDNA()[0];
+		this.setRadius(DNA);
+		this.setHealth(DNA * 5);
+		this.setMaxHP(this.getHealth());
+		this.setSpeed(4000/DNA);
+		
+		this.setPosition(new Vec2(MathUtil.nextInt(0, Life.getSize()), MathUtil.nextInt(0, Life.getSize())));
+		this.setVelocity(new Vec2(0,0));
+		
+		this.setAlive(true);
+	}
+	
+	public void update(Iterator<Drone> it) {
+		applyScouting();
+		updatePosition();
+		applyEating();
+		updateHealth(it);
+	}
+	
+	private void applyEating() {
+		Iterator<Food> it = Life.getFoods().getFoods().iterator();
+		while (it.hasNext()) {
+		    Food food = it.next();
+		    
+		    if(MathUtil.inRange(MathUtil.getDistance(getPosition(), food.getPosition()), Food.getCollision() + getRadius())) {
+		    	it.remove();
+		    	maxHealth();
+		    }
+		}
+	}
+	
+	private void applyScouting() {
+		if(Math.round(health) % 10 == 0 ) {
+			getVelocity().setX(randomizeVelocity());
+			getVelocity().setY(randomizeVelocity());
+		}
+	}
+	
+	private void updatePosition() {
+		getPosition().add(velocity);
+	}
+	
+	private void updateHealth(Iterator<Drone> it) {
+		health -= Gdx.graphics.getDeltaTime() * ENERGY;
+		if(getHealth() <= 0) {
+			setAlive(false);
+			it.remove();
+		}
+	}
+	
+	private float randomizeVelocity() {
+//		float temp = MathUtil.nextFloat(speed/1.5f, speed);
+		float temp = speed;
+		if(MathUtil.nextInt(1, 2) == 1) {
+			temp *= -1;
+		}
+		
+		temp *= Gdx.graphics.getDeltaTime();
+		
+		return temp;
+	}
+	
+	public void draw() {
+		Render.drawCircleFilled(new Color((getHealth())/255f, 0, 0, 0.5f), getPosition().getX(), getPosition().getY(), getRadius());
+	}
+	
+	private void maxHealth() {
+		setHealth(getMaxHP());
+	}
+
+	public float getHealth() {
+		return health;
+	}
+	public void setHealth(float health) {
+		this.health = health;
+	}
+
+	public int getRadius() {
+		return radius;
+	}
+	public void setRadius(int size) {
+		this.radius = size;
+	}
+
+	public int getSpeed() {
+		return speed;
+	}
+	public void setSpeed(int speed) {
+		this.speed = speed;
+	}
+
+	public Vec2 getPosition() {
+		return position;
+	}
+	public void setPosition(Vec2 position) {
+		this.position = position;
+	}
+
+	public Vec2 getVelocity() {
+		return velocity;
+	}
+	public void setVelocity(Vec2 velocity) {
+		this.velocity = velocity;
+	}
+
+	public boolean isAlive() {
+		return isAlive;
+	}
+	public void setAlive(boolean isAlive) {
+		this.isAlive = isAlive;
+	}
+
+	public float getMaxHP() {
+		return max_health;
+	}
+	public void setMaxHP(float max_health) {
+		this.max_health = max_health;
+	}
+}
