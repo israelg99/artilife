@@ -79,7 +79,7 @@ public class Drone {
 	}
 	
 	private void applyScouting() {
-		if(Math.round(health) % 10 == 0 ) {
+		if(Math.round(health) % 13 == 0 ) {
 			getVelocity().setX(randomizeVelocity());
 			getVelocity().setY(randomizeVelocity());
 		}
