@@ -1,18 +1,20 @@
 package com.genetic.life.organism;
 
 import java.util.Iterator;
+import java.util.ListIterator;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.genetic.life.basic.Life;
 import com.genetic.life.basic.Render;
+import com.genetic.life.basic.Update;
 import com.genetic.life.utils.MathUtil;
 import com.genetic.life.utils.Vec2;
 import com.genetic.life.world.Food;
 
 public class Drone {
 	
-	public static int ENERGY = 10;
+	private static int ENERGY = 10;
+	private static float mutationRate = 0.5f;
 	
 	private Vec2 position;
 	private Vec2 velocity;
@@ -24,26 +26,46 @@ public class Drone {
 	
 	private boolean isAlive;
 	
-	public Drone(DNA dna) {
-		int DNA = dna.getDNA()[0];
+	private DNA dna;
+	
+	public Drone(DNA source, Vec2 pos) {
+		this.setDNA(source);
+		
+		int DNA = this.dna.getDNA()[0];
 		this.setRadius(DNA);
-		this.setHealth(DNA * 5);
-		this.setMaxHP(this.getHealth());
+		this.setMaxHP(DNA * 5);
+		this.setHealth(this.getMaxHP());
 		this.setSpeed(4000/DNA);
 		
-		this.setPosition(new Vec2(MathUtil.nextInt(0, Life.getSize()), MathUtil.nextInt(0, Life.getSize())));
+		this.setPosition(pos);
 		this.setVelocity(new Vec2(0,0));
 		
 		this.setAlive(true);
 	}
+	public Drone(DNA dna) {
+		this(dna, new Vec2(MathUtil.nextInt(0, Life.getSize()), MathUtil.nextInt(0, Life.getSize())));
+	}
 	
-	public void update(Iterator<Drone> it) {
+	public Drone() {
+		this(new DNA());
+	}
+	
+	public void update(ListIterator<Drone> it) {
 		applyScouting();
 		updatePosition();
 		applyEating();
+		applyReproduction(it);
 		updateHealth(it);
 	}
 	
+	private void applyReproduction(ListIterator<Drone> it) {
+		if(getHealth() > getEnergy() && MathUtil.nextInt(1, 1200) == 1) {
+			Drone drone = new Drone(DNA.mutate(getDNA(), mutationRate), new Vec2(getPosition().getX(), getPosition().getY()-getRadius()));
+			drone.setHealth(getHealth());
+			it.add(drone);
+		}
+	}
+
 	private void applyEating() {
 		Iterator<Food> it = Life.getFoods().getFoods().iterator();
 		while (it.hasNext()) {
@@ -67,8 +89,8 @@ public class Drone {
 		getPosition().add(velocity);
 	}
 	
-	private void updateHealth(Iterator<Drone> it) {
-		health -= Gdx.graphics.getDeltaTime() * ENERGY;
+	private void updateHealth(ListIterator<Drone> it) {
+		health -= Update.updateTime * getEnergy();
 		if(getHealth() <= 0) {
 			setAlive(false);
 			it.remove();
@@ -82,7 +104,7 @@ public class Drone {
 			temp *= -1;
 		}
 		
-		temp *= Gdx.graphics.getDeltaTime();
+		temp *= Update.updateTime;
 		
 		return temp;
 	}
@@ -99,7 +121,7 @@ public class Drone {
 		return health;
 	}
 	public void setHealth(float health) {
-		this.health = health;
+		this.health =  health < getMaxHP() ? health : getMaxHP();
 	}
 
 	public int getRadius() {
@@ -142,5 +164,19 @@ public class Drone {
 	}
 	public void setMaxHP(float max_health) {
 		this.max_health = max_health;
+	}
+
+	public static int getEnergy() {
+		return ENERGY;
+	}
+	public static void setEnergy(int energy) {
+		ENERGY = energy;
+	}
+	
+	public DNA getDNA() {
+		return dna;
+	}
+	public void setDNA(DNA dna) {
+		this.dna = dna;
 	}
 }

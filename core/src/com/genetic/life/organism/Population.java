@@ -1,8 +1,8 @@
 package com.genetic.life.organism;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 
 import com.genetic.life.utils.MathUtil;
 
@@ -16,7 +16,7 @@ public class Population {
 	public Population(int length) {
 		pop = new ArrayList<Drone>();
 		for(int i = 0; i < length; i++) {
-			pop.add(new Drone(new DNA()));
+			pop.add(new Drone());
 		}
 	}
 	public Population() {
@@ -24,7 +24,7 @@ public class Population {
 	}
 	
 	public void update() {
-		Iterator<Drone> it = getPopulation().iterator();
+		ListIterator<Drone> it = getPopulation().listIterator();
 		while (it.hasNext()) {
 		    Drone drone = it.next();
 		    if (drone.isAlive()) {

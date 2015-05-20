@@ -10,7 +10,10 @@ public class MathUtil {
 		return random.nextInt((max - min) + 1) + min;
 	}
 	public static float nextFloat(float min, float max) {
-		return min + (int)(random.nextFloat() * ((max - min) + 1));
+		return min + (nextFloat() * ((max - min) + 1));
+	}
+	public static float nextFloat() {
+		return random.nextFloat();
 	}
 	
 	public static float getDistance(Vec2 vec1, Vec2 vec2) {

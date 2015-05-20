@@ -4,6 +4,8 @@ import com.genetic.life.resources.Resources;
 
 public class Update {
 	
+	public static final float updateTime = 60/1000f;
+	
 	public static void update() {
 		
 		updateLife();
